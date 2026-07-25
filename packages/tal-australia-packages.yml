@@ -1,0 +1,20 @@
+generated: '2026-07-25'
+method: searched
+source: public package registry probes, 2026-07-25
+note: |
+  No first-party TAL client library exists on any public package registry. This
+  is the expected result for a partner-gated carrier with no public API — it is
+  recorded so the negative is auditable rather than re-probed each round.
+registries_probed:
+- registry: npm
+  queries: [tal-sdk, '@tal/sdk', tal-australia, talapi, 'search text=tal.com.au']
+  result: no first-party package (registry search returned 0 results for
+    tal.com.au)
+- registry: pypi
+  queries: [tal-australia, tal-life]
+  result: 404
+- registry: github
+  queries: [tal-australia, TALAustralia, tal-au, talaustralia, tallife]
+  result: no TAL organisation (previously confirmed 404 in review.yml)
+packages: []
+official_sdk_count: 0

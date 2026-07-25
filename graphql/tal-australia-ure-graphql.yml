@@ -1,0 +1,62 @@
+generated: '2026-07-25'
+method: searched
+source: https://ure-prod-graphql-app.tal.com.au/graphql
+spec_type: GraphQL
+status: live-but-introspection-restricted
+note: |
+  TAL runs a production GraphQL endpoint for its Underwriting Rules Engine
+  (URE). It was found by enumerating certificate transparency records for
+  *.tal.com.au (crt.sh) — it is not linked from any TAL page and appears in no
+  documentation. It answers anonymous POSTs, but field-level introspection is
+  suppressed, so no SDL can be captured. Nothing below is inferred: every value
+  is a verbatim response observed on 2026-07-25.
+endpoint: https://ure-prod-graphql-app.tal.com.au/graphql
+transport: HTTPS POST application/json
+observed:
+  get_root:
+    request: GET /
+    status: 404
+  get_graphql:
+    request: GET /graphql
+    status: 403
+  post_introspection_min:
+    request: 'POST /graphql {"query":"{__schema{queryType{name}}}"}'
+    status: 200
+    response: '{"data":{"__schema":{"queryType":{"name":"CaseQuery"}}}}'
+  post_typename:
+    request: 'POST /graphql {"query":"{__typename}"}'
+    status: 200
+    response: '{"data":{"__typename":"CaseQuery"}}'
+  post_full_introspection:
+    request: standard IntrospectionQuery
+    status: 200
+    response: '{"data":{"__schema":{"queryType":{"name":"CaseQuery"},"mutationType":null,"subscriptionType":null,"types":[],"directives":[]}}}'
+    interpretation: Schema metadata is served but types[] and directives[] are
+      returned empty and queryType.fields is empty — introspection is filtered,
+      not disabled. No SDL is derivable.
+  post_unknown_field:
+    request: 'POST /graphql {"query":"{zzz}"}'
+    status: 200
+    response: '{"errors":[{"message":"Cannot query field \"zzz\" on type \"CaseQuery\".","locations":[{"line":1,"column":2}],"extensions":{"code":"FIELDS_ON_CORRECT_TYPE","codes":["FIELDS_ON_CORRECT_TYPE"],"number":"5.3.1"}}]}'
+schema:
+  query_type: CaseQuery
+  mutation_type: null
+  subscription_type: null
+  fields: []
+  sdl_captured: false
+  sdl_reason: Field introspection is filtered by the server; capturing the SDL
+    would require an authenticated client. No schema is fabricated here.
+server_fingerprint:
+  library: Hot Chocolate (.NET) — inferred from the errors[].extensions.codes and
+    numeric spec-section shape of the validation error envelope
+  confidence: medium
+related_hosts:
+- host: ure-uat-graphql-app.tal.com.au
+  note: UAT sibling of the same service (certificate transparency).
+- host: ure-prod-il-uwengine-app.tal.com.au
+  note: Individual Life underwriting engine.
+- host: ure-group-uwengine-app.tal.com.au
+  note: Group underwriting engine.
+- host: ure.spa.prod.tal.com.au
+  note: Single-page app front end for URE.
+gated: true

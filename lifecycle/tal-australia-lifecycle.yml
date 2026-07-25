@@ -1,0 +1,53 @@
+generated: '2026-07-25'
+method: derived
+source: live probes of TAL hosts + certificate transparency enumeration, 2026-07-25
+note: |
+  TAL publishes no API versioning policy, no deprecation policy, no SLA and no
+  status page. What is recorded here is the environment/versioning shape that
+  can be read off TAL's own hosts, plus the explicit absences.
+versioning:
+  scheme: uri-path
+  current: v1
+  scope: identity surface only (/oauth2/v1/* on all three Okta issuers)
+  docs: null
+  api_versioning_policy: null
+deprecation:
+  policy_url: null
+  sunset_header: false
+  deprecation_header: false
+  note: No RFC 8594 Sunset support and no published deprecation policy. Brand
+    migrations are visible in the host estate instead — asteron-* and btlife-*
+    hosts run alongside adviser-* on the same retail platform, which is how TAL
+    carries acquired books (Asteron Life, BT Life) rather than through a
+    versioned public contract.
+sla:
+  url: null
+  uptime_target: null
+status_page:
+  url: null
+  probed:
+  - url: https://status.tal.com.au
+    status: 0
+    note: DNS does not resolve.
+  - url: https://www.tal.com.au/status
+    status: 404
+  note: No public status page. Partner-facing incident communication is
+    presumably bilateral.
+environments:
+  note: TAL runs a conventional promotion ladder, visible in certificate
+    transparency but not publicly reachable. None of these is a published
+    sandbox — they are internal/partner environments and are recorded only as
+    evidence of the delivery pipeline.
+  observed: [dev, dev1, dev2, dev3, ci, qa, qa1, qa2, qa3, qa117, sys1, uat,
+    sandpit, spike, preprod, prod, demo, green (blue/green slots)]
+  examples:
+  - dev.api.developer.tal.com.au
+  - preprod.partner.api.tal.com.au
+  - green.qa.api.developer.tal.com.au
+  - ure-uat-graphql-app.tal.com.au
+  - demo.api.grouphq.tal.com.au
+deprecated_operations: []
+changelog:
+  url: null
+  note: No dated API changelog. The nearest public record of change is the media
+    centre at https://www.tal.com.au/about-us/media-centre.

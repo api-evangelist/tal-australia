@@ -1,0 +1,90 @@
+generated: '2026-07-25'
+method: searched
+source: https://login.talpartner.tal.com.au/.well-known/openid-configuration
+docs: null
+note: |
+  TAL declares no OpenAPI, so these scopes come straight from the
+  scopes_supported arrays of TAL's three live OpenID Connect discovery
+  documents. They are the standard OIDC scope set — TAL publishes no
+  business-domain scopes (no quote, policy, claim or underwriting scopes are
+  advertised anonymously). Any partner-specific scopes live on custom Okta
+  authorization servers that are not discoverable without a client.
+schemes:
+- name: talpartner-oidc
+  source: well-known/tal-australia-talpartner-openid-configuration.json
+  issuer: https://login.talpartner.tal.com.au
+  flows:
+  - flow: authorizationCode
+    authorizationUrl: https://login.talpartner.tal.com.au/oauth2/v1/authorize
+    tokenUrl: https://login.talpartner.tal.com.au/oauth2/v1/token
+  - flow: deviceCode
+    deviceAuthorizationUrl: https://login.talpartner.tal.com.au/oauth2/v1/device/authorize
+    tokenUrl: https://login.talpartner.tal.com.au/oauth2/v1/token
+- name: acp-oidc
+  source: well-known/tal-australia-acp-openid-configuration.json
+  issuer: https://auth.acp.tal.com.au
+  flows:
+  - flow: authorizationCode
+    authorizationUrl: https://auth.acp.tal.com.au/oauth2/v1/authorize
+    tokenUrl: https://auth.acp.tal.com.au/oauth2/v1/token
+- name: claimsassist-oidc
+  source: well-known/tal-australia-claimsassist-openid-configuration.json
+  issuer: https://auth.claimsassist.tal.com.au
+  flows:
+  - flow: authorizationCode
+    authorizationUrl: https://auth.claimsassist.tal.com.au/oauth2/v1/authorize
+    tokenUrl: https://auth.claimsassist.tal.com.au/oauth2/v1/token
+scopes:
+- scope: openid
+  description: Request an ID token and authenticate the end user (OpenID Connect
+    core).
+  flows: [authorizationCode]
+  sources: [well-known/tal-australia-talpartner-openid-configuration.json,
+    well-known/tal-australia-acp-openid-configuration.json,
+    well-known/tal-australia-claimsassist-openid-configuration.json]
+- scope: profile
+  description: Basic profile claims (name, given_name, family_name, preferred_username,
+    locale, zoneinfo, updated_at).
+  flows: [authorizationCode]
+  sources: [well-known/tal-australia-talpartner-openid-configuration.json,
+    well-known/tal-australia-acp-openid-configuration.json,
+    well-known/tal-australia-claimsassist-openid-configuration.json]
+- scope: email
+  description: email and email_verified claims.
+  flows: [authorizationCode]
+  sources: [well-known/tal-australia-talpartner-openid-configuration.json,
+    well-known/tal-australia-acp-openid-configuration.json,
+    well-known/tal-australia-claimsassist-openid-configuration.json]
+- scope: address
+  description: address claim.
+  flows: [authorizationCode]
+  sources: [well-known/tal-australia-talpartner-openid-configuration.json,
+    well-known/tal-australia-acp-openid-configuration.json,
+    well-known/tal-australia-claimsassist-openid-configuration.json]
+- scope: phone
+  description: phone_number and phone_number_verified claims.
+  flows: [authorizationCode]
+  sources: [well-known/tal-australia-talpartner-openid-configuration.json,
+    well-known/tal-australia-acp-openid-configuration.json,
+    well-known/tal-australia-claimsassist-openid-configuration.json]
+- scope: offline_access
+  description: Issue a refresh token so the partner application can act without
+    the user present.
+  flows: [authorizationCode]
+  sources: [well-known/tal-australia-talpartner-openid-configuration.json,
+    well-known/tal-australia-acp-openid-configuration.json,
+    well-known/tal-australia-claimsassist-openid-configuration.json]
+- scope: groups
+  description: Group membership claim — the mechanism TAL's Okta tenants use to
+    carry partner/role entitlement into the token.
+  flows: [authorizationCode]
+  sources: [well-known/tal-australia-talpartner-openid-configuration.json,
+    well-known/tal-australia-acp-openid-configuration.json,
+    well-known/tal-australia-claimsassist-openid-configuration.json]
+gaps:
+- No business-domain scopes (quote / policy / claim / underwriting / member) are
+  published on any anonymously reachable authorization server.
+- The Okta stock "default" authorization server at
+  https://talpartner-au.okta.com/oauth2/default advertises only Okta platform
+  scopes (okta.myAccount.*, okta.users.*), which are vendor scopes rather than
+  TAL API scopes, so they are deliberately not listed here.

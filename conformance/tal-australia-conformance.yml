@@ -1,0 +1,104 @@
+generated: '2026-07-25'
+method: derived
+source: well-known/tal-australia-talpartner-openid-configuration.json,
+  well-known/tal-australia-acp-openid-configuration.json,
+  well-known/tal-australia-claimsassist-openid-configuration.json,
+  graphql/tal-australia-ure-graphql.yml, live host probes 2026-07-25
+note: |
+  Derived from what TAL actually serves anonymously. TAL makes no published
+  conformance claim anywhere on its public properties — every "conforms: true"
+  below is evidenced by an artifact in this repo, and every "false" means the
+  standard was checked for and not found, not that TAL was asked.
+standards:
+- id: oauth2
+  conforms: true
+  evidence: RFC 6749 authorization/token endpoints advertised by three TAL Okta
+    issuers (login.talpartner, auth.acp, auth.claimsassist).
+- id: oidc-core
+  conforms: true
+  evidence: id_token_signing_alg_values_supported RS256, userinfo_endpoint and
+    claims_supported published in discovery.
+- id: oidc-discovery
+  conforms: true
+  evidence: /.well-known/openid-configuration returns 200 on all three issuers.
+- id: rfc8414-oauth-authorization-server-metadata
+  conforms: true
+  evidence: /.well-known/oauth-authorization-server returns 200 on
+    login.talpartner.tal.com.au.
+- id: rfc7636-pkce
+  conforms: true
+  evidence: code_challenge_methods_supported = [S256].
+- id: rfc9126-pushed-authorization-requests
+  conforms: true
+  evidence: pushed_authorization_request_endpoint published
+    (/oauth2/v1/par) on login.talpartner.tal.com.au.
+- id: rfc9449-dpop
+  conforms: true
+  evidence: dpop_signing_alg_values_supported published on
+    login.talpartner.tal.com.au.
+- id: rfc8628-device-authorization-grant
+  conforms: true
+  evidence: device_authorization_endpoint and
+    urn:ietf:params:oauth:grant-type:device_code advertised.
+- id: openid-ciba
+  conforms: true
+  evidence: urn:openid:params:grant-type:ciba in grant_types_supported and
+    backchannel_token_delivery_modes_supported = [poll].
+- id: rfc7662-token-introspection
+  conforms: true
+  evidence: introspection_endpoint published.
+- id: rfc7009-token-revocation
+  conforms: true
+  evidence: revocation_endpoint published.
+- id: rfc7591-dynamic-client-registration
+  conforms: partial
+  evidence: registration_endpoint (/oauth2/v1/clients) is advertised, but it is
+    an Okta org default and TAL operates no open self-serve registration.
+- id: rfc6750-bearer-token
+  conforms: true
+  evidence: 'WWW-Authenticate: Bearer realm="app-b2bcommon-prodmel.azurewebsites.net"
+    returned by https://common.glsb2b.tal.com.au/.'
+- id: graphql
+  conforms: true
+  evidence: Live GraphQL endpoint at ure-prod-graphql-app.tal.com.au/graphql,
+    query root type CaseQuery; introspection filtered.
+- id: openapi
+  conforms: false
+  evidence: No OpenAPI/Swagger document is served on any TAL host probed
+    (www, api, adviser, partner.api, glsb2b, claimsassist API hosts).
+- id: asyncapi
+  conforms: false
+  evidence: No event, streaming or webhook surface is documented or discoverable.
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: Observed error envelopes are vendor-native (Okta errorCode/errorSummary,
+    GraphQL errors[]), not application/problem+json.
+- id: rfc9116-security-txt
+  conforms: false
+  evidence: /.well-known/security.txt returns 404 or 405 on every TAL host.
+- id: rfc8594-sunset-header
+  conforms: false
+  evidence: No Sunset or Deprecation header and no deprecation policy published.
+- id: acord
+  conforms: false
+  evidence: Zero occurrences of ACORD, AL3, ACORD XML or NGDS across
+    tal.com.au, adviser.tal.com.au and backd.com.au (2026-07-25). Consistent
+    with the Australian life market, where adviser data moves through commercial
+    planning software rather than ACORD.
+- id: cdr-consumer-data-right
+  conforms: false
+  evidence: Australia's CDR was designated to extend to insurance and then
+    deferred; no open-insurance obligation applies to a life insurer, and TAL
+    publishes no CDR register presence.
+- id: fhir
+  conforms: false
+  evidence: No FHIR resources, endpoints or claims — TAL is a life insurer, not
+    a health-data holder under an interoperability mandate.
+- id: fapi
+  conforms: false
+  evidence: No FAPI profile claim; discovery advertises the implicit and
+    resource-owner-password grants, which FAPI 1.0 Advanced forbids.
+- id: pci-dss
+  conforms: unknown
+  evidence: payments.tal.com.au is live and takes card payments, but TAL
+    publishes no PCI DSS attestation or trust centre.

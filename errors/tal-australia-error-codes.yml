@@ -1,0 +1,72 @@
+generated: '2026-07-25'
+method: derived
+source: live responses observed from TAL hosts on 2026-07-25
+format: vendor-native
+note: |
+  TAL publishes no error reference. This catalogue records only error envelopes
+  and codes that were actually returned by TAL-controlled hosts during
+  enrichment probing. It is deliberately small: with no OpenAPI to derive 4xx/5xx
+  responses from, this is the whole observable error surface.
+envelopes:
+- name: okta-identity-error
+  applies_to: [https://login.talpartner.tal.com.au, https://auth.acp.tal.com.au,
+    https://auth.claimsassist.tal.com.au]
+  media_type: application/json
+  shape:
+    errorCode: string — vendor error code (E0000xxx)
+    errorSummary: string — human readable summary
+    errorLink: string — vendor documentation pointer
+    errorId: string — per-request correlation id
+    errorCauses: array — field-level causes
+  note: Okta's standard identity error envelope. Not RFC 9457.
+- name: graphql-errors
+  applies_to: [https://ure-prod-graphql-app.tal.com.au/graphql]
+  media_type: application/json
+  shape:
+    errors[].message: string
+    errors[].locations: array of {line, column}
+    errors[].extensions.code: string — validation rule name
+    errors[].extensions.codes: array
+    errors[].extensions.number: string — GraphQL spec section number
+  note: GraphQL spec error envelope; always HTTP 200 with errors[] populated.
+- name: azure-appservice-401
+  applies_to: [https://common.glsb2b.tal.com.au]
+  media_type: text/html
+  shape: 'HTML body "You do not have permission to view this directory or page."
+    with WWW-Authenticate: Bearer realm="app-b2bcommon-prodmel.azurewebsites.net"'
+  note: Platform-level rejection ahead of the application; no structured error
+    body is returned to an unauthenticated caller.
+- name: waf-block
+  applies_to: [https://iress.api.tal.com.au, https://liferisk.api.tal.com.au,
+    https://omnium.api.tal.com.au]
+  media_type: text/html
+  shape: '<html><header><title>Unauthorized</title></header><body>Your request has
+    been blocked</body></html>'
+  note: Edge/WAF block returned to any caller outside the allow-listed partner
+    network. HTTP 403.
+errors:
+- code: E0000022
+  status: 405
+  envelope: okta-identity-error
+  summary: The endpoint does not support the provided HTTP method.
+  observed_at: 'GET https://login.talpartner.tal.com.au/.well-known/oauth-protected-resource'
+  action: Use the HTTP method the endpoint documents; the path exists but the
+    verb is not allowed.
+- code: E0000028
+  status: 400
+  envelope: okta-identity-error
+  summary: The request is missing a required parameter.
+  observed_at: 'GET https://login.talpartner.tal.com.au/.well-known/webfinger'
+  action: Supply the required query parameters (WebFinger requires resource=).
+- code: FIELDS_ON_CORRECT_TYPE
+  status: 200
+  envelope: graphql-errors
+  summary: Cannot query field "<field>" on type "CaseQuery".
+  observed_at: 'POST https://ure-prod-graphql-app.tal.com.au/graphql'
+  action: Query only fields defined on the root CaseQuery type. Because
+    introspection is filtered, the valid field set is only available to an
+    authenticated partner integration.
+gaps:
+- No published error reference, error-code registry or remediation guide exists
+  on any TAL property.
+- No RFC 9457 application/problem+json responses were observed.

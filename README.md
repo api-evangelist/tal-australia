@@ -18,6 +18,9 @@ TAL is Australia's largest life insurer by inforce risk-only premium (NMG Consul
 - Embedded Insurance
 - Partner Gated
 - No Public API
+- OpenID Connect
+- GraphQL
+- Identity
 
 ## Timestamps
 
@@ -26,26 +29,61 @@ TAL is Australia's largest life insurer by inforce risk-only premium (NMG Consul
 
 ## APIs
 
-None. TAL publishes no public, self-serve API.
+TAL publishes no public, self-serve API — but it is **not API-less, it is
+API-private**. Enumerating certificate transparency for `*.tal.com.au` (832
+distinct names) and probing what actually resolves turned up a real partner API
+estate on 2026-07-25:
 
-Every candidate developer hostname was probed on 2026-07-25:
-`developer.tal.com.au`, `developers.tal.com.au` and `docs.tal.com.au` do not
-resolve; `www.tal.com.au/developers`, `/api`, `/developer`, `/partners` and
-`/integrations` all return 404; and `api.tal.com.au` resolves behind Azure Front
-Door but returns an empty `application/json` 404 at root and at every probed
-spec path — it is an internal backend for TAL's own web and mobile properties,
-not a documented public API.
+| Surface | Host | Anonymous result |
+|---|---|---|
+| Partner identity (OpenID Connect) | `login.talpartner.tal.com.au` | **200** — full OIDC + RFC 8414 discovery |
+| ACP identity | `auth.acp.tal.com.au` | **200** — OIDC discovery |
+| Claims Assist identity | `auth.claimsassist.tal.com.au` | **200** — OIDC discovery |
+| Underwriting Rules Engine GraphQL | `ure-prod-graphql-app.tal.com.au/graphql` | **200 on POST** — root type `CaseQuery`, introspection filtered |
+| Group Life B2B common service | `common.glsb2b.tal.com.au` | **401** — `WWW-Authenticate: Bearer` |
+| Group Life B2B (uwin/uwout/claimsin/claimsout/clpapi/delivery) | `*.glsb2b.tal.com.au` | 403 / 502 / 200 (Azure Function shell) |
+| Per-distributor API hosts | `iress.api`, `liferisk.api`, `omnium.api`, `partner.api` | 403 or connection-refused — edge-restricted to partners |
+| Group HQ partner portal | `www.grouphq.tal.com.au` | **200** — login-gated super-fund partner portal |
 
-The closest thing to an integration surface is
+The hostnames a reviewer would guess — `developer.tal.com.au`,
+`api.developer.tal.com.au`, `apicatalog.tal.com.au`, `apiportal.tal.com.au`,
+`gateway.tal.com.au` — all hold TLS certificates (with full dev/qa/preprod/green
+ladders behind them) but **do not resolve in public DNS**. TAL built a developer
+portal and an API catalogue and kept them inside.
+
+The `iress.api.tal.com.au` hostname is the first hard evidence of TAL's adviser
+software integration seam: TAL names no third-party planning software anywhere
+on its public pages.
+
+No OpenAPI, Swagger, AsyncAPI, `.proto` or Postman collection is published on any
+TAL-controlled host, so this repo has no `openapi/` directory. The URE GraphQL
+endpoint answers, but field-level introspection is filtered, so no SDL exists to
+capture and none is fabricated. No webhook or event catalog is documented.
+
+The closest human integration surfaces remain
 [adviser.tal.com.au](https://adviser.tal.com.au/) — the **TAL Adviser Centre**,
-a Sitecore extranet for licensed financial advisers. It returns HTTP 200, but
-unknown paths redirect to `/404?item=…&user=extranet\Anonymous&site=TAC`, and its
-navigation is products, Risk Academy training, claims, forms and documents. It is
-a **partner/agent login wall, not a developer portal**.
+a Sitecore extranet for licensed financial advisers — and
+[Group HQ](https://www.grouphq.tal.com.au/) for superannuation partners. Both are
+**login walls, not developer portals**.
 
-No OpenAPI, Swagger, AsyncAPI, GraphQL SDL, `.proto` or Postman collection is
-published on any TAL-controlled host, so this repo has no `openapi/` directory.
-No webhook or event catalog is documented.
+## Harvested artifacts
+
+- `llms/tal-australia-llms.txt` — TAL's own published `llms.txt` (71 KB, last
+  modified 2026-06-29), harvested verbatim. The only machine-consumable document
+  TAL publishes to the open web.
+- `well-known/` — index plus four harvested discovery documents (three OIDC
+  configurations and one RFC 8414 authorization-server metadata document).
+- `authentication/`, `scopes/` — the partner auth model and the published scope
+  set (standard OIDC scopes only; no business-domain scopes exist publicly).
+- `graphql/` — the URE endpoint, its observed responses, and an explicit record
+  that the schema is gated.
+- `conformance/` — 25 standards checked, each with evidence: OAuth 2.0, OIDC,
+  PKCE, PAR, DPoP, CIBA and device code conform; OpenAPI, AsyncAPI, RFC 9457,
+  RFC 9116, RFC 8594, ACORD, CDR, FHIR and FAPI do not.
+- `errors/`, `conventions/`, `lifecycle/`, `packages/`, `security/` — derived
+  and probed profiles, including the measured absences (no idempotency contract,
+  no pagination, no rate-limit signalling, no status page, no changelog, no
+  security.txt, no SDKs).
 
 **ACORD posture: no ACORD reference found.** Searching tal.com.au,
 adviser.tal.com.au and backd.com.au for ACORD, AL3, ACORD XML and NGDS returned
@@ -73,14 +111,22 @@ super funds and named partners. Its most API-shaped asset is not even its own �
 that does publish a real API, and that consumer brand currently serves a
 "Coming Soon" placeholder at [backd.com.au](https://backd.com.au/).
 
-Recording the absence accurately is the point.
+Recording that shape accurately is the point — and the second pass sharpened it.
+The absence is not of APIs; TAL has an identity tenant, a GraphQL underwriting
+engine and a bearer-protected B2B estate. The absence is of *documentation,
+registration and self-service*. A carrier can run a full API programme and still
+be invisible to everyone it did not sign a contract with.
 
 ## Links
 
 - [TAL](https://www.tal.com.au/)
 - [About TAL](https://www.tal.com.au/about-us)
 - [TAL Adviser Centre (login-gated)](https://adviser.tal.com.au/)
+- [TAL Group HQ (login-gated superannuation partner portal)](https://www.grouphq.tal.com.au/)
 - [Adviser Partners](https://www.tal.com.au/adviser-partners)
+- [Superannuation Partners](https://www.tal.com.au/superannuation-partners)
+- [Contact / Support](https://www.tal.com.au/contact-us)
+- [Insurance FAQs](https://www.tal.com.au/tools-and-faqs/insurance-faqs)
 - [Media Centre](https://www.tal.com.au/about-us/media-centre)
 - [Slice of Life Blog](https://www.tal.com.au/slice-of-life-blog)
 - [Security](https://www.tal.com.au/security)

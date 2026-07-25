@@ -1,0 +1,77 @@
+generated: '2026-07-25'
+method: derived
+source: well-known/tal-australia-talpartner-openid-configuration.json,
+  graphql/tal-australia-ure-graphql.yml, errors/tal-australia-error-codes.yml,
+  live host probes 2026-07-25
+note: |
+  TAL publishes no developer documentation, so there is no documented convention
+  set to capture. What follows is what can honestly be observed from the wire.
+  Every "published: false" below is a measured absence, not an assumption — and
+  the shape of that absence is the point: an integrator cannot learn TAL's
+  request/response semantics without a signed partner agreement.
+authentication:
+  style: OpenID Connect / OAuth 2.0 bearer tokens (partner-issued)
+  detail: authentication/tal-australia-authentication.yml
+  published: true
+  self_serve: false
+transport:
+  https_only: true
+  tls: TLSv1.3 observed on www.tal.com.au
+  hsts: false
+  http_versions: [HTTP/2]
+  edge: Azure Front Door across api.tal.com.au and the *.api.tal.com.au partner
+    hosts; Azure App Service / Azure Functions behind the glsb2b estate.
+idempotency:
+  published: false
+  header: null
+  note: No Idempotency-Key header, no idempotency documentation and no OpenAPI
+    parameter exists to derive one from. No idempotency contract is claimed.
+pagination:
+  published: false
+  style: null
+  note: Not observable — no REST contract is served anonymously.
+field_expansion:
+  published: false
+metadata:
+  published: false
+request_tracing:
+  published: partial
+  headers:
+  - name: x-azure-ref
+    note: Azure Front Door correlation id returned on api.tal.com.au and
+      www.tal.com.au responses.
+  - name: errorId
+    note: Per-request correlation id inside the Okta identity error envelope.
+  - name: request-context
+    note: 'Application Insights header (appId=cid-v1:...) returned by
+      www.tal.com.au.'
+versioning:
+  scheme: uri-path (identity surface only)
+  current: v1
+  evidence: All TAL Okta endpoints are versioned /oauth2/v1/*.
+  api_versioning_published: false
+  note: The GraphQL and partner REST surfaces expose no version identifier
+    anonymously.
+error_envelope:
+  style: vendor-native (Okta identity envelope, GraphQL errors[], platform HTML)
+  rfc9457: false
+  detail: errors/tal-australia-error-codes.yml
+rate_limiting:
+  published: false
+  headers_observed: []
+  note: No X-Rate-Limit / RateLimit-* headers were returned on any anonymous
+    request. Okta org defaults presumably apply to the identity surface but are
+    not advertised by TAL.
+graphql:
+  endpoint: https://ure-prod-graphql-app.tal.com.au/graphql
+  introspection: filtered
+  root_query_type: CaseQuery
+  mutations: none declared
+  detail: graphql/tal-australia-ure-graphql.yml
+cross_links:
+  authentication: authentication/tal-australia-authentication.yml
+  scopes: scopes/tal-australia-scopes.yml
+  errors: errors/tal-australia-error-codes.yml
+  lifecycle: lifecycle/tal-australia-lifecycle.yml
+  conformance: conformance/tal-australia-conformance.yml
+  well_known: well-known/tal-australia-well-known.yml

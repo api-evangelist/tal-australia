@@ -85,9 +85,107 @@ findings:
   specifications:
     openapiHarvested: false
     count: 0
-    note: No OpenAPI, Swagger, AsyncAPI, GraphQL SDL or .proto artifact is
-      published anywhere on a TAL-controlled host. The openapi/ directory is
-      deliberately absent from this repo because nothing real was found.
+    note: No OpenAPI, Swagger, AsyncAPI or .proto artifact is published anywhere
+      on a TAL-controlled host. The openapi/ directory is deliberately absent
+      from this repo because nothing real was found. The enrichment round on
+      2026-07-25 did, however, harvest three machine-readable contracts that the
+      first pass missed — see apiEstate below — namely three live OpenID Connect
+      discovery documents and a production GraphQL endpoint whose field
+      introspection is filtered.
+  apiEstate:
+    method: certificate-transparency enumeration (crt.sh, 832 distinct names for
+      *.tal.com.au) followed by DNS resolution and live HTTP probing on
+      2026-07-25
+    summary: |
+      TAL is not API-less; it is API-private. The corporate hostnames a reviewer
+      would guess (developer., docs., api.developer., apicatalog., apiportal.,
+      gateway.) all hold TLS certificates but do not resolve in public DNS —
+      TAL built and then internalised a developer portal and API catalogue.
+      What does resolve is a real partner API estate: an OpenID Connect partner
+      identity tenant, a bearer-protected Group Life B2B integration estate, a
+      set of per-distributor API hosts (one of them named for the Iress adviser
+      software), and a production Underwriting Rules Engine GraphQL endpoint.
+      None of it is documented, registrable or self-serve, which is why the
+      developer-portal answer above remains false.
+    certificatesButNoPublicDNS:
+    - developer.tal.com.au
+    - api.developer.tal.com.au
+    - apicatalog.tal.com.au
+    - apiportal.tal.com.au
+    - gateway.tal.com.au
+    - partner.tal.com.au
+    - api.developer.internal.tal.com.au
+    - api.internal.tal.com.au
+    liveHosts:
+    - url: https://login.talpartner.tal.com.au/.well-known/openid-configuration
+      status: 200
+      note: Full OIDC discovery. Okta org talpartner-au.okta.com. PKCE S256,
+        PAR, DPoP, CIBA, device code, introspection, revocation. Harvested to
+        well-known/.
+    - url: https://login.talpartner.tal.com.au/.well-known/oauth-authorization-server
+      status: 200
+      note: RFC 8414 authorization-server metadata. Harvested.
+    - url: https://auth.acp.tal.com.au/.well-known/openid-configuration
+      status: 200
+      note: Second TAL Okta tenant (ACP). Harvested.
+    - url: https://auth.claimsassist.tal.com.au/.well-known/openid-configuration
+      status: 200
+      note: Third TAL Okta tenant (TAL Claims Assist). Harvested.
+    - url: https://ure-prod-graphql-app.tal.com.au/graphql
+      status: 200 on POST (403 on GET)
+      note: Underwriting Rules Engine GraphQL. Root query type CaseQuery, no
+        mutation or subscription type. Field introspection filtered — types[]
+        and fields[] return empty, so no SDL exists to capture.
+    - url: https://common.glsb2b.tal.com.au/
+      status: 401
+      note: 'WWW-Authenticate: Bearer realm="app-b2bcommon-prodmel.azurewebsites.net",
+        X-Powered-By ASP.NET. Every discovery path (/swagger, /swagger/v1/swagger.json,
+        /openapi.json, /api-docs, /health) also returns 401. A genuine
+        OAuth-protected partner API with no anonymous surface.'
+    - url: https://delivery.glsb2b.tal.com.au/
+      status: 200
+      note: Azure Function App default landing page.
+    - url: https://uwout.glsb2b.tal.com.au/
+      status: 403
+      note: Group underwriting outbound. Edge-blocked to non-partner callers.
+    - url: https://clpapi.glsb2b.tal.com.au/
+      status: 403
+    - url: https://iress.api.tal.com.au/
+      status: 403
+      note: Edge block "Your request has been blocked". The hostname is direct
+        evidence of an Iress adviser-software integration seam, which the first
+        review could not find because TAL names no third-party software
+        publicly.
+    - url: https://liferisk.api.tal.com.au/
+      status: 403
+    - url: https://omnium.api.tal.com.au/
+      status: 403
+    - url: https://partner.api.tal.com.au/
+      status: 0
+      note: Resolves to an Azure address (20.53.144.52) but the TCP connection
+        times out from the public internet — network-restricted to partners.
+    - url: https://www.grouphq.tal.com.au/
+      status: 200
+      note: TAL Group HQ — the superannuation-partner portal, login-gated. The
+        human surface in front of the glsb2b estate.
+    - url: https://quote-portal.tal.com.au/
+      status: 200
+      note: React single-page app titled "EBQ" (employee benefits quoting).
+    - url: https://payments.tal.com.au/
+      status: 200
+      note: React app titled "TAL - Make a Payment".
+    - url: https://www.tal.com.au/llms.txt
+      status: 200
+      note: A real, published llms.txt (71 KB, last modified 2026-06-29) —
+        curation for AI crawlers over the marketing sitemap, not an API
+        artifact, but the only machine-consumable document TAL publishes to the
+        open web. Harvested verbatim to llms/.
+    environments: TAL runs dev/dev1-3, ci, qa/qa1-3/qa117, sys1, uat, sandpit,
+      spike, preprod and green (blue/green) slots for the developer portal,
+      partner API and catalogue hosts. None is a published sandbox.
+    brands: The retail platform carries adviser-, asteron- and btlife- host
+      families side by side, which is how TAL runs the Asteron Life and BT Life
+      books it acquired.
   acordPosture: no ACORD reference found
   acordNote: |
     Searched tal.com.au, adviser.tal.com.au and backd.com.au for ACORD, AL3,
@@ -116,13 +214,22 @@ findings:
     audience: agent-facing and partner-only; nothing consumer- or
       developer-facing is exposed programmatically.
   authModel:
-    scheme: none published
-    note: No public API means no public auth scheme. adviser.tal.com.au uses a
-      session-based Sitecore extranet login. Neither
-      /.well-known/openid-configuration nor /.well-known/oauth-authorization-server
-      is served on www.tal.com.au (404) or adviser.tal.com.au (302 to the
-      extranet 404 handler), so no OAuth/OIDC discovery metadata is available
-      anonymously.
+    scheme: OpenID Connect / OAuth 2.0 bearer, partner-issued
+    selfServe: false
+    note: |
+      Corrected on 2026-07-25. Neither /.well-known/openid-configuration nor
+      /.well-known/oauth-authorization-server is served on www.tal.com.au (404)
+      or adviser.tal.com.au (302 to the extranet 404 handler) — but three
+      TAL-branded Okta tenants do serve full, anonymous discovery:
+      login.talpartner.tal.com.au, auth.acp.tal.com.au and
+      auth.claimsassist.tal.com.au. They advertise authorization-code with PKCE
+      S256, device code, CIBA, refresh tokens, PAR and DPoP, and the only scopes
+      published are the standard OIDC set (openid, profile, email, address,
+      phone, offline_access, groups) — no business-domain scopes. The Group Life
+      B2B estate is bearer-protected (WWW-Authenticate on common.glsb2b).
+      Registration is advertised but not open: there is no self-serve path to a
+      client, so the practical auth model remains "sign a partner agreement".
+      Captured in authentication/ and scopes/.
   webhooks:
     exists: false
     note: No event catalog, webhook documentation or AsyncAPI definition is
@@ -132,7 +239,15 @@ findings:
     note: No public Postman collection or workspace is linked from any TAL
       property.
   graphql:
-    exists: false
+    exists: true
+    documented: false
+    endpoint: https://ure-prod-graphql-app.tal.com.au/graphql
+    introspection: filtered
+    note: Corrected on 2026-07-25. TAL runs a production GraphQL endpoint for
+      its Underwriting Rules Engine. It answers anonymous POSTs and reports
+      query root type CaseQuery with no mutation or subscription type, but
+      field-level introspection returns empty, so no SDL can be captured and
+      none is fabricated. Recorded in graphql/tal-australia-ure-graphql.yml.
   grpc:
     exists: false
   githubOrganization:
@@ -149,6 +264,9 @@ findings:
       and returns 404 to every probed path.
   - protocol: GraphQL
     documented: false
+    exists: true
+    note: ure-prod-graphql-app.tal.com.au/graphql answers anonymous POSTs; root
+      query type CaseQuery; introspection filtered.
   - protocol: WebSocket
     documented: false
   - protocol: AsyncAPI/Events
@@ -198,11 +316,56 @@ sources:
 - url: https://www.tal.com.au/sitemap.xml
   type: Sitemap
   note: 556 URLs. No developer, API or documentation section. Fetched 2026-07-25.
+- url: https://www.tal.com.au/llms.txt
+  type: LLMsTxt
+  note: Real published llms.txt, 71,463 bytes, last modified 2026-06-29. Curates
+    the marketing sitemap for LLM crawlers under Primary Information, Blog and
+    Editorial, Products / Services / Collections, Support and Purchase Guidance,
+    Policies and Optional headings. Harvested verbatim on 2026-07-25.
+- url: https://crt.sh/?q=%25.tal.com.au
+  type: CertificateTransparency
+  note: 832 distinct certificate names for *.tal.com.au. The source that
+    surfaced the partner API estate (partner.api, iress.api, liferisk.api,
+    omnium.api, the glsb2b family, the URE GraphQL hosts) and the internalised
+    developer-portal hostnames. Enumerated 2026-07-25.
+- url: https://login.talpartner.tal.com.au/.well-known/openid-configuration
+  type: OpenIDConnect
+  note: TAL's partner identity tenant. Full OIDC discovery, HTTP 200, harvested
+    verbatim 2026-07-25.
+- url: https://common.glsb2b.tal.com.au/
+  type: API
+  note: 'Group Life B2B common service. HTTP 401 with WWW-Authenticate: Bearer
+    realm="app-b2bcommon-prodmel.azurewebsites.net". Probed 2026-07-25.'
 actions:
   apisYmlUpdated: true
   openapiDirectoryCreated: false
   reason: |
-    Recorded as an honest stub. TAL has real, substantial insurance operations
-    and zero public API surface, so apis[] is intentionally empty rather than
-    populated with a login wall or a marketing page misclassified as a
-    developer portal. This absence is the measurement.
+    Round one recorded an honest stub with an empty apis[]. The 2026-07-25
+    enrichment round replaced that with three real, verified API entries — the
+    partner OpenID Connect tenant, the Group Life B2B estate and the URE
+    GraphQL endpoint — each explicitly marked as gated, because they are live
+    TAL APIs even though none is documented or self-serve. openapi/ stays
+    absent: no OpenAPI, Swagger, AsyncAPI or .proto exists anywhere on a
+    TAL-controlled host.
+  enrichmentRounds:
+  - date: '2026-07-25'
+    method: search + probe + derive
+    added:
+    - llms/tal-australia-llms.txt (searched, verbatim)
+    - well-known/ index plus four harvested OIDC / OAuth metadata documents
+    - authentication/tal-australia-authentication.yml (searched)
+    - scopes/tal-australia-scopes.yml (searched)
+    - graphql/tal-australia-ure-graphql.yml (searched, SDL gated)
+    - conformance/tal-australia-conformance.yml (derived)
+    - errors/tal-australia-error-codes.yml (derived from observed envelopes)
+    - conventions/tal-australia-conventions.yml (derived)
+    - lifecycle/tal-australia-lifecycle.yml (derived)
+    - packages/tal-australia-packages.yml (searched, empty by result)
+    - security/tal-australia-domain-security.yml (probed)
+    notFound:
+    - OpenAPI / Swagger / AsyncAPI / Protobuf
+    - security.txt, trust centre, vulnerability disclosure or bug bounty
+    - status page, changelog, deprecation policy, SLA
+    - MCP server, agent skills, CLI, SDKs, Postman collection, embedded
+      components, published sandbox
+    - webhooks or any event surface

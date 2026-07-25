@@ -1,0 +1,93 @@
+generated: '2026-07-25'
+method: searched
+source: https://login.talpartner.tal.com.au/.well-known/openid-configuration
+docs: null
+note: |
+  TAL publishes no OpenAPI, so this profile is built from live, anonymous
+  OpenID Connect discovery documents on TAL's own identity hosts plus the
+  WWW-Authenticate challenges returned by TAL's partner API hosts. Every value
+  below was observed on 2026-07-25; nothing is inferred from marketing copy.
+summary:
+  types: [openIdConnect, oauth2, http]
+  api_key_in: []
+  oauth2_flows: [authorizationCode, implicit, refresh_token, password, device_code,
+    ciba]
+  pkce: S256
+  public_registration: false
+  gated: true
+schemes:
+- name: talpartner-oidc
+  type: openIdConnect
+  issuer: https://login.talpartner.tal.com.au
+  openIdConnectUrl: https://login.talpartner.tal.com.au/.well-known/openid-configuration
+  vendor: Okta (org talpartner-au.okta.com)
+  purpose: Partner / distributor sign-in for TAL partner applications
+  endpoints:
+    authorization: https://login.talpartner.tal.com.au/oauth2/v1/authorize
+    token: https://login.talpartner.tal.com.au/oauth2/v1/token
+    userinfo: https://login.talpartner.tal.com.au/oauth2/v1/userinfo
+    jwks: https://login.talpartner.tal.com.au/oauth2/v1/keys
+    introspection: https://login.talpartner.tal.com.au/oauth2/v1/introspect
+    revocation: https://login.talpartner.tal.com.au/oauth2/v1/revoke
+    end_session: https://login.talpartner.tal.com.au/oauth2/v1/logout
+    registration: https://login.talpartner.tal.com.au/oauth2/v1/clients
+    device_authorization: https://login.talpartner.tal.com.au/oauth2/v1/device/authorize
+    pushed_authorization_request: https://login.talpartner.tal.com.au/oauth2/v1/par
+  grant_types: [authorization_code, implicit, refresh_token, password,
+    'urn:ietf:params:oauth:grant-type:device_code', 'urn:openid:params:grant-type:ciba']
+  response_types: [code, id_token, code id_token, code token, id_token token,
+    code id_token token]
+  token_endpoint_auth_methods: [client_secret_basic, client_secret_post,
+    client_secret_jwt, private_key_jwt, none]
+  code_challenge_methods: [S256]
+  id_token_signing_alg: [RS256]
+  id_token_encryption_alg: [RSA-OAEP-256, RSA-OAEP-384, RSA-OAEP-512]
+  dpop_signing_alg: [RS256, RS384, RS512, ES256, ES384, ES512]
+  request_object_supported: true
+  sources: [well-known/tal-australia-talpartner-openid-configuration.json]
+- name: acp-oidc
+  type: openIdConnect
+  issuer: https://auth.acp.tal.com.au
+  openIdConnectUrl: https://auth.acp.tal.com.au/.well-known/openid-configuration
+  vendor: Okta
+  purpose: Identity for acp.tal.com.au
+  grant_types: [authorization_code, implicit, refresh_token, password,
+    'urn:ietf:params:oauth:grant-type:device_code', 'urn:openid:params:grant-type:ciba']
+  code_challenge_methods: [S256]
+  sources: [well-known/tal-australia-acp-openid-configuration.json]
+- name: claimsassist-oidc
+  type: openIdConnect
+  issuer: https://auth.claimsassist.tal.com.au
+  openIdConnectUrl: https://auth.claimsassist.tal.com.au/.well-known/openid-configuration
+  vendor: Okta
+  purpose: Identity for TAL Claims Assist (claimassist.tal.com.au) and its
+    EFT / group-claims / TFN APIs
+  grant_types: [authorization_code, implicit, refresh_token, password,
+    'urn:ietf:params:oauth:grant-type:device_code']
+  code_challenge_methods: [S256]
+  sources: [well-known/tal-australia-claimsassist-openid-configuration.json]
+- name: glsb2b-bearer
+  type: http
+  scheme: bearer
+  purpose: TAL Group Life B2B (glsb2b) partner API estate
+  evidence: 'HTTP 401 with WWW-Authenticate: Bearer realm="app-b2bcommon-prodmel.azurewebsites.net"
+    from https://common.glsb2b.tal.com.au/ on 2026-07-25 (ASP.NET on Azure App
+    Service). Every path probed under that host returns 401 to an anonymous
+    caller, including /swagger, /swagger/v1/swagger.json and /openapi.json.'
+  sources: [live probe]
+- name: adviser-centre-session
+  type: session
+  scheme: cookie
+  purpose: TAL Adviser Centre extranet (adviser.tal.com.au)
+  evidence: Sitecore extranet login; unknown paths 302 to
+    /404?item=...&user=extranet%5cAnonymous&site=TAC. No OIDC discovery served.
+  sources: [review.yml]
+onboarding:
+  self_serve: false
+  note: |
+    There is no public client registration, no developer key issuance and no
+    published credential flow. Access to every TAL API host observed is granted
+    through a bilateral partner agreement (adviser software vendors, super-fund
+    administrators, payroll/embedded distributors). The Okta dynamic client
+    registration endpoint is advertised in discovery but is an Okta org default,
+    not an open self-service path.

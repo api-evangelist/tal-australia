@@ -1,0 +1,89 @@
+generated: '2026-07-25'
+method: searched
+source: live probes of /.well-known/* across every TAL-controlled host discovered
+  via certificate transparency (crt.sh) and apis.yml
+note: |
+  TAL publishes no /.well-known/ surface on its consumer or corporate hosts, but
+  three TAL-branded Okta identity tenants serve full, anonymous OpenID Connect
+  discovery documents. Those are the only machine-readable API contracts TAL
+  exposes publicly, and they describe how partners authenticate to the gated
+  partner API estate rather than the business APIs themselves.
+hosts:
+- host: https://login.talpartner.tal.com.au
+  role: TAL Partner identity provider (Okta org talpartner-au.okta.com)
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: tal-australia-talpartner-openid-configuration.json
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: tal-australia-talpartner-oauth-authorization-server.json
+  - path: /oauth2/default/.well-known/openid-configuration
+    status: 200
+    note: Okta stock "default" authorization server (issuer
+      https://talpartner-au.okta.com/oauth2/default); its scopes_supported are
+      Okta platform scopes (okta.myAccount.*), not TAL business scopes, so it is
+      recorded but not harvested.
+  - path: /oauth2/v1/keys
+    status: 200
+    note: JWKS. Not stored — key material rotates.
+  - path: /.well-known/oauth-protected-resource
+    status: 405
+  - path: /.well-known/security.txt
+    status: 405
+- host: https://auth.acp.tal.com.au
+  role: Identity provider for ACP (acp.tal.com.au)
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: tal-australia-acp-openid-configuration.json
+- host: https://auth.claimsassist.tal.com.au
+  role: Identity provider for TAL Claims Assist (claimassist.tal.com.au)
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: tal-australia-claimsassist-openid-configuration.json
+- host: https://www.tal.com.au
+  role: Corporate / consumer marketing site
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+- host: https://api.tal.com.au
+  role: Azure Front Door backend for TAL's own digital properties
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+- host: https://adviser.tal.com.au
+  role: TAL Adviser Centre (Sitecore extranet)
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 302
+    note: Redirects to the extranet anonymous-user 404 handler.
+- host: https://adviser-auth-prod.retail.tal.com.au
+  role: Retail platform adviser auth host
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 403
+- host: https://asteron-auth-prod.retail.tal.com.au
+  role: Asteron Life (TAL-owned brand) auth host
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 403
+- host: https://btlife-auth-prod.retail.tal.com.au
+  role: BT Life (TAL-acquired book) auth host
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 403
+security_txt:
+  exists: false
+  note: RFC 9116 security.txt is not served on any TAL host probed on 2026-07-25.
