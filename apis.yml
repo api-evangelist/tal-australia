@@ -1,0 +1,59 @@
+aid: tal-australia
+url: https://raw.githubusercontent.com/api-evangelist/tal-australia/refs/heads/main/apis.yml
+name: TAL
+kind: company
+description: >-
+  TAL is Australia's largest life insurer by inforce risk-only premium
+  (NMG Consulting, 2023), owned by Japan's Dai-ichi Life Group and underwriting
+  through TAL Life Limited (ABN 70 050 109 450, AFSL 237848). Operating in the
+  Australian market for roughly 150 years, TAL writes life cover, income
+  protection, total and permanent disability and critical illness, and reports
+  paying $4.7 billion in benefits to 57,000 customers and their families in its
+  most recent year. It distributes through three channels — financial advisers
+  via the login-gated TAL Adviser Centre, group insurance inside superannuation
+  funds, and direct/embedded offers including backd by TAL, a payroll-embedded
+  product built with Sydney insurtech Cover Genius. TAL's API posture is
+  partner-gated and closed: no developer portal, no public API reference, no
+  downloadable OpenAPI, and no published ACORD or AL3 position. The only
+  integration surfaces are the adviser extranet behind a login and bilateral
+  partner arrangements with super funds, payroll platforms and distributors.
+  Australia's Consumer Data Right was designated to extend to insurance but was
+  deferred, so no open-insurance mandate forces a public surface here.
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+tags:
+- Insurance
+- Australia
+- Life Insurance
+- Income Protection
+- Group Insurance
+- Superannuation
+- Underwriting
+- Claims
+- Carrier
+- Embedded Insurance
+- Partner Gated
+- No Public API
+created: '2026-07-25'
+modified: '2026-07-25'
+specificationVersion: '0.19'
+apis: []
+common:
+- type: Website
+  url: https://www.tal.com.au/
+- type: About
+  url: https://www.tal.com.au/about-us
+- type: PartnerPortal
+  url: https://adviser.tal.com.au/
+- type: Blog
+  url: https://www.tal.com.au/slice-of-life-blog
+- type: Press
+  url: https://www.tal.com.au/about-us/media-centre
+- type: PrivacyPolicy
+  url: https://www.tal.com.au/privacy-policy
+- type: Security
+  url: https://www.tal.com.au/security
+- type: LinkedIn
+  url: https://www.linkedin.com/company/tal-australia
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

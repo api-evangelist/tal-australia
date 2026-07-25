@@ -1,0 +1,208 @@
+aid: tal-australia
+name: TAL
+review:
+  question: Does TAL publish a public, self-serve developer portal or downloadable
+    API definitions for its Australian life insurance business?
+  answer: false
+  date: '2026-07-25'
+  reviewer: API Evangelist
+  homeMarket: Australia
+  tier: carrier-life-health
+findings:
+  summary: |
+    TAL, Australia's largest life insurer, publishes no public developer portal,
+    no API reference, and no downloadable API definitions. Every candidate
+    developer hostname was probed on 2026-07-25 and either failed DNS resolution
+    or returned 404. The single non-marketing integration surface is
+    adviser.tal.com.au — the TAL Adviser Centre — which is a Sitecore extranet
+    for licensed financial advisers, not a developer portal. Unknown paths there
+    redirect (302) to /404?item=...&user=extranet%5cAnonymous&site=TAC, which
+    confirms an authenticated extranet with an anonymous-user fall-through, and
+    the portal's own navigation covers products, Risk Academy training, claims,
+    forms and documents, with no API, integration, data feed or standards
+    material anywhere on it. Integration with TAL is therefore bilateral and
+    relationship-based: adviser quoting and application happen inside the
+    gated Adviser Centre, group insurance runs through negotiated
+    superannuation-fund arrangements, and embedded distribution runs through
+    named partners rather than a self-serve API.
+  developerPortal:
+    exists: false
+    closestSurface: https://adviser.tal.com.au/
+    closestSurfaceStatus: 200
+    closestSurfaceClassification: partner/agent login wall (Sitecore extranet,
+      site=TAC "TAL Adviser Centre"); NOT a developer portal
+    gated: true
+  hostProbes:
+  - url: https://tal.com.au
+    status: 200
+    note: Redirects to https://www.tal.com.au/ — corporate marketing site.
+  - url: https://developer.tal.com.au
+    status: 0
+    note: DNS does not resolve.
+  - url: https://developers.tal.com.au
+    status: 0
+    note: DNS does not resolve.
+  - url: https://docs.tal.com.au
+    status: 0
+    note: DNS does not resolve.
+  - url: https://api.tal.com.au
+    status: 404
+    note: Host resolves and is served by Azure Front Door (x-azure-ref present),
+      returning an empty application/json 404 at root. /openapi.json,
+      /openapi.yaml, /swagger.json, /api-docs, /v1, /health and /docs all
+      returned 404. This is an internal backend host for TAL's own digital
+      properties, not a documented public API.
+  - url: https://www.tal.com.au/developers
+    status: 404
+  - url: https://www.tal.com.au/api
+    status: 404
+  - url: https://www.tal.com.au/developer
+    status: 404
+  - url: https://www.tal.com.au/partners
+    status: 404
+  - url: https://www.tal.com.au/integrations
+    status: 404
+  - url: https://adviser.tal.com.au/
+    status: 200
+    note: Live adviser (agent) portal with login. /api, /api-docs and
+      /.well-known/openid-configuration all 302 to the extranet 404 handler.
+      /openapi.json and /swagger.json return 404.
+  - url: https://mytal.tal.com.au/
+    status: 302
+    note: Customer self-service host; redirects to /500?errorcode=106 without a
+      session. No API documentation.
+  - url: https://backd.com.au/
+    status: 200
+    note: backd by TAL (the TAL x Cover Genius embedded product) serves a
+      "Coming Soon" placeholder page. Every path including /developers, /api,
+      /docs, /openapi.json and /swagger.json returns the same HTML placeholder
+      with content-type text/html — no API surface, no spec.
+  - url: https://www.tal.com.au/robots.txt
+    status: 200
+    note: Sitemap at https://www.tal.com.au/sitemap.xml. 556 URLs enumerated; no
+      /developers, /api or /docs section exists. Top segments are about-us (281),
+      slice-of-life-blog (140), existing-customers (35) and claims (14).
+  specifications:
+    openapiHarvested: false
+    count: 0
+    note: No OpenAPI, Swagger, AsyncAPI, GraphQL SDL or .proto artifact is
+      published anywhere on a TAL-controlled host. The openapi/ directory is
+      deliberately absent from this repo because nothing real was found.
+  acordPosture: no ACORD reference found
+  acordNote: |
+    Searched tal.com.au, adviser.tal.com.au and backd.com.au for ACORD, AL3,
+    ACORD XML, NGDS and "ACORD certified" on 2026-07-25 and found zero
+    occurrences. This is consistent with the market: ACORD AL3 / IVANS agency
+    download is a US property-and-casualty artifact, and Australian life
+    insurance instead moves adviser data through commercial planning and
+    quoting software (the Iress/XPLAN class of tools) under bilateral
+    arrangements. TAL documents no such integration publicly either — it names
+    no third-party adviser software on its public adviser-partners page.
+  insuranceVerbs:
+    quote:
+      exposed: false
+      note: Quoting exists only inside the gated TAL Adviser Centre ("from
+        quoting and application, through to managing existing business and
+        making a claim") and in consumer web forms. No public quote API.
+    bind:
+      exposed: false
+    issue:
+      exposed: false
+    fnol:
+      exposed: false
+      note: Claims are lodged through www.tal.com.au/claims/make-a-claim web
+        forms (including co-branded Westpac and St.George paths) and through the
+        adviser portal. No FNOL API is documented.
+    audience: agent-facing and partner-only; nothing consumer- or
+      developer-facing is exposed programmatically.
+  authModel:
+    scheme: none published
+    note: No public API means no public auth scheme. adviser.tal.com.au uses a
+      session-based Sitecore extranet login. Neither
+      /.well-known/openid-configuration nor /.well-known/oauth-authorization-server
+      is served on www.tal.com.au (404) or adviser.tal.com.au (302 to the
+      extranet 404 handler), so no OAuth/OIDC discovery metadata is available
+      anonymously.
+  webhooks:
+    exists: false
+    note: No event catalog, webhook documentation or AsyncAPI definition is
+      published. Absence is the finding.
+  postman:
+    exists: false
+    note: No public Postman collection or workspace is linked from any TAL
+      property.
+  graphql:
+    exists: false
+  grpc:
+    exists: false
+  githubOrganization:
+    exists: false
+    note: https://api.github.com/orgs/tal-australia returns 404 and a GitHub user
+      search for TAL life insurance Australia returns zero results. No public
+      source presence was identified.
+  transports:
+  - protocol: REST
+    scheme: https
+    documented: false
+    note: TAL's own web and mobile properties are backed by api.tal.com.au
+      (Azure Front Door), but that host is undocumented, unversioned in public,
+      and returns 404 to every probed path.
+  - protocol: GraphQL
+    documented: false
+  - protocol: WebSocket
+    documented: false
+  - protocol: AsyncAPI/Events
+    documented: false
+  - protocol: ACORD/EDI
+    documented: false
+    note: No ACORD XML, AL3 or NGDS transport is referenced publicly.
+  marketSeam: |
+    Australia has the legal machinery for open insurance and no live obligation.
+    APRA supervises prudentially, and the Consumer Data Right that already
+    opened banking and energy was designated to extend to general insurance and
+    then deferred and de-prioritised — so the CDR seam that made Australian
+    banking legible stops before insurance, and stops well before life
+    insurance. TAL sits squarely in that gap: a dominant carrier with no
+    regulatory forcing function to publish anything, and no commercial reason to
+    self-serve when its distribution is advisers, super funds and named
+    partners. Its most API-shaped asset is not its own — backd by TAL is built
+    on Cover Genius, the Sydney embedded-insurance company that does publish a
+    real API, and even that consumer brand currently serves a placeholder page.
+sources:
+- url: https://www.tal.com.au/
+  type: Website
+  note: Corporate marketing site. Probed 2026-07-25, HTTP 200.
+- url: https://www.tal.com.au/about-us
+  type: About
+  note: Ownership (Dai-ichi Life Group), legal entity TAL Life Limited ABN 70 050
+    109 450 AFSL 237848, "$4.7 billion in benefits to 57,000 customers",
+    "Australia's largest life insurer" per NMG Consulting (2023). Fetched
+    2026-07-25.
+- url: https://adviser.tal.com.au/
+  type: PartnerPortal
+  note: TAL Adviser Centre. Login-gated adviser portal; navigation is Products,
+    Risk Academy, Claims, Tools & Resources, Our Team, Latest News. No API,
+    integration, data feed, ACORD or XML material. Fetched 2026-07-25, HTTP 200.
+- url: https://www.tal.com.au/adviser-partners
+  type: Documentation
+  note: '"Our dedicated adviser portal provides you with tools to make doing
+    business with TAL easy: from quoting and application, through to managing
+    existing business and making a claim." No third-party software, API or
+    standards integration is named. Fetched 2026-07-25.'
+- url: https://www.tal.com.au/about-us/media-centre/cover-genius-tal-partnership
+  type: Press
+  note: Announces backd by TAL with Cover Genius — payroll-embedded life, income
+    and illness protection, "no underwriting and 100% digital claims". Describes
+    "embedding it into their existing HR or payroll platform" but names no API,
+    no XCover integration and no technical specification. Fetched 2026-07-25.
+- url: https://www.tal.com.au/sitemap.xml
+  type: Sitemap
+  note: 556 URLs. No developer, API or documentation section. Fetched 2026-07-25.
+actions:
+  apisYmlUpdated: true
+  openapiDirectoryCreated: false
+  reason: |
+    Recorded as an honest stub. TAL has real, substantial insurance operations
+    and zero public API surface, so apis[] is intentionally empty rather than
+    populated with a login wall or a marketing page misclassified as a
+    developer portal. This absence is the measurement.
