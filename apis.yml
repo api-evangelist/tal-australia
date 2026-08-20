@@ -60,6 +60,11 @@ apis:
   tags:
   - Identity
   - OpenID Connect
+  - Authentication
+  - Partner
+  tags_raw:
+  - Identity
+  - OpenID Connect
   - OAuth 2.0
   - Partner
   properties:
