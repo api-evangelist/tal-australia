@@ -86,7 +86,7 @@ apis:
   - Identity
   - OpenID Connect
   - Authentication
-  - Partner
+  - Partners
   tags_raw:
   - Identity
   - OpenID Connect
@@ -115,6 +115,12 @@ apis:
   humanURL: https://www.grouphq.tal.com.au/
   baseURL: https://common.glsb2b.tal.com.au
   tags:
+  - Group Insurance
+  - Superannuation
+  - Underwriting
+  - Claims
+  - Partners
+  tags_raw:
   - Group Insurance
   - Superannuation
   - Underwriting
