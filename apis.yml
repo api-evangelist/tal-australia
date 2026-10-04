@@ -61,7 +61,6 @@ tags:
 - Embedded Insurance
 - Partner Gated
 - No Public API
-- OpenID Connect
 - GraphQL
 - Identity
 created: '2026-07-25'
@@ -210,3 +209,5 @@ common:
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
+x-tags-removed:
+- OpenID Connect
