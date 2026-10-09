@@ -39,6 +39,9 @@ accessModel:
   trial: false
   try_now: false
   public: false
+  gated: partner
+  gated_source:
+  - tag:Partner Gated
   label: Self-serve signup
   confidence: medium
   source:
@@ -59,8 +62,6 @@ tags:
 - Claims
 - Carrier
 - Embedded Insurance
-- Partner Gated
-- No Public API
 - GraphQL
 - Identity
 created: '2026-07-25'
@@ -211,3 +212,5 @@ maintainers:
   email: kin@apievangelist.com
 x-tags-removed:
 - OpenID Connect
+- No Public API
+- Partner Gated
