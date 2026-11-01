@@ -1,4 +1,4 @@
-# TAL (tal-australia)
+# TAL
 
 <!-- API-EVANGELIST-PROVENANCE:BEGIN -->
 > ### About this repository
@@ -64,139 +64,96 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-TAL is Australia's largest life insurer by inforce risk-only premium (NMG Consulting, 2023), owned by Japan's Dai-ichi Life Group and underwriting through TAL Life Limited (ABN 70 050 109 450, AFSL 237848). Operating in the Australian market for roughly 150 years, TAL writes life cover, income protection, total and permanent disability and critical illness, and reports paying $4.7 billion in benefits to 57,000 customers and their families in its most recent year. It distributes through three channels — financial advisers via the login-gated TAL Adviser Centre, group insurance inside superannuation funds, and direct/embedded offers including backd by TAL, a payroll-embedded product built with Sydney insurtech Cover Genius. TAL's API posture is partner-gated and closed: no developer portal, no public API reference, no downloadable OpenAPI, and no published ACORD or AL3 position. The only integration surfaces are the adviser extranet behind a login and bilateral partner arrangements with super funds, payroll platforms and distributors. Australia's Consumer Data Right was designated to extend to insurance but was deferred, so no open-insurance mandate forces a public surface here.
+TAL is Australia's largest life insurer by inforce risk-only premium (NMG Consulting, 2023), owned by Japan's Dai-ichi Life Group and underwriting through TAL Life Limited (ABN 70 050 109 450, AFSL 237848). Operating in the Australian market for roughly 150 years, TAL writes life cover, income protection, total and permanent disability and critical illness, and reports paying $4.7 billion in benefits to 57,000 customers and their families in its most recent year. It distributes through three channels — financial advisers via the login-gated TAL Adviser Centre, group insurance inside superannuation funds, and direct/embedded offers including backd by TAL, a payroll-embedded product built with Sydney insurtech Cover Genius. TAL is not API-less, it is API-private: certificate transparency and live probing surface a real partner API estate — an OpenID Connect partner identity tenant, a bearer-protected Group Life B2B integration estate (glsb2b), per-distributor API hosts including one named for the Iress adviser software, and a production Underwriting Rules Engine GraphQL endpoint — none of which is documented, registrable or self-serve. There is no developer portal, no public API reference, no downloadable OpenAPI, and no published ACORD or AL3 position. Australia's Consumer Data Right was designated to extend to insurance but was deferred, so no open-insurance mandate forces a public surface here.
 
-**APIs.json:** [https://raw.githubusercontent.com/api-evangelist/tal-australia/refs/heads/main/apis.yml](https://raw.githubusercontent.com/api-evangelist/tal-australia/refs/heads/main/apis.yml)
+**Areas:** Insurance · Australia · Life Insurance · Income Protection · Group Insurance · Superannuation · Underwriting · Claims · Carrier · Embedded Insurance · GraphQL · Identity
 
-## Tags
+## TAL on APIs.io
 
-- Insurance
-- Australia
-- Life Insurance
-- Income Protection
-- Group Insurance
-- Superannuation
-- Underwriting
-- Claims
-- Carrier
-- Embedded Insurance
-- Partner Gated
-- No Public API
-- OpenID Connect
-- GraphQL
-- Identity
+Everything profiled for TAL is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/tal-australia/](https://apis.io/providers/tal-australia/)** — or go straight to one of the APIs or properties below.
 
-## Timestamps
+### APIs (3)
 
-- **Created:** 2026-07-25
-- **Modified:** 2026-07-25
+- [TAL Partner Identity](https://apis.io/apis/tal-australia/tal-partner-identity/) — TAL's partner-facing OpenID Connect identity tenant (Okta org talpartner-au.okta.com), and the only machine-readable API contract TAL serves anonymously.…
+- [TAL Group Life B2B (glsb2b)](https://apis.io/apis/tal-australia/tal-group-life-b2b-glsb2b/) — The integration estate behind TAL's group insurance business with superannuation funds — underwriting in/out (uwin, uwout), claims in/out (claimsin,…
+- [TAL Underwriting Rules Engine (URE) GraphQL](https://apis.io/apis/tal-australia/tal-underwriting-rules-engine-ure-graphql/) — A live production GraphQL endpoint serving TAL's Underwriting Rules Engine. It answers anonymous POSTs and reports a query root type of CaseQuery with no…
 
-## APIs
+### Published properties
 
-TAL publishes no public, self-serve API — but it is **not API-less, it is
-API-private**. Enumerating certificate transparency for `*.tal.com.au` (832
-distinct names) and probing what actually resolves turned up a real partner API
-estate on 2026-07-25:
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-| Surface | Host | Anonymous result |
-|---|---|---|
-| Partner identity (OpenID Connect) | `login.talpartner.tal.com.au` | **200** — full OIDC + RFC 8414 discovery |
-| ACP identity | `auth.acp.tal.com.au` | **200** — OIDC discovery |
-| Claims Assist identity | `auth.claimsassist.tal.com.au` | **200** — OIDC discovery |
-| Underwriting Rules Engine GraphQL | `ure-prod-graphql-app.tal.com.au/graphql` | **200 on POST** — root type `CaseQuery`, introspection filtered |
-| Group Life B2B common service | `common.glsb2b.tal.com.au` | **401** — `WWW-Authenticate: Bearer` |
-| Group Life B2B (uwin/uwout/claimsin/claimsout/clpapi/delivery) | `*.glsb2b.tal.com.au` | 403 / 502 / 200 (Azure Function shell) |
-| Per-distributor API hosts | `iress.api`, `liferisk.api`, `omnium.api`, `partner.api` | 403 or connection-refused — edge-restricted to partners |
-| Group HQ partner portal | `www.grouphq.tal.com.au` | **200** — login-gated super-fund partner portal |
+#### Security (2)
 
-The hostnames a reviewer would guess — `developer.tal.com.au`,
-`api.developer.tal.com.au`, `apicatalog.tal.com.au`, `apiportal.tal.com.au`,
-`gateway.tal.com.au` — all hold TLS certificates (with full dev/qa/preprod/green
-ladders behind them) but **do not resolve in public DNS**. TAL built a developer
-portal and an API catalogue and kept them inside.
+Authentication, trust centre, and vulnerability disclosure.
 
-The `iress.api.tal.com.au` hostname is the first hard evidence of TAL's adviser
-software integration seam: TAL names no third-party planning software anywhere
-on its public pages.
+- [Tal Australia Authentication](https://apis.io/security/tal-australia/tal-australia-authentication/)
+- [Tal Australia Domain Security](https://apis.io/security/tal-australia/tal-australia-domain-security/)
 
-No OpenAPI, Swagger, AsyncAPI, `.proto` or Postman collection is published on any
-TAL-controlled host, so this repo has no `openapi/` directory. The URE GraphQL
-endpoint answers, but field-level introspection is filtered, so no SDL exists to
-capture and none is fabricated. No webhook or event catalog is documented.
+#### OAuth scopes (1)
 
-The closest human integration surfaces remain
-[adviser.tal.com.au](https://adviser.tal.com.au/) — the **TAL Adviser Centre**,
-a Sitecore extranet for licensed financial advisers — and
-[Group HQ](https://www.grouphq.tal.com.au/) for superannuation partners. Both are
-**login walls, not developer portals**.
+The permissions the API asks for.
 
-## Harvested artifacts
+- [Tal Australia Scopes](https://apis.io/scopes/tal-australia/tal-australia-scopes/)
 
-- `llms/tal-australia-llms.txt` — TAL's own published `llms.txt` (71 KB, last
-  modified 2026-06-29), harvested verbatim. The only machine-consumable document
-  TAL publishes to the open web.
-- `well-known/` — index plus four harvested discovery documents (three OIDC
-  configurations and one RFC 8414 authorization-server metadata document).
-- `authentication/`, `scopes/` — the partner auth model and the published scope
-  set (standard OIDC scopes only; no business-domain scopes exist publicly).
-- `graphql/` — the URE endpoint, its observed responses, and an explicit record
-  that the schema is gated.
-- `conformance/` — 25 standards checked, each with evidence: OAuth 2.0, OIDC,
-  PKCE, PAR, DPoP, CIBA and device code conform; OpenAPI, AsyncAPI, RFC 9457,
-  RFC 9116, RFC 8594, ACORD, CDR, FHIR and FAPI do not.
-- `errors/`, `conventions/`, `lifecycle/`, `packages/`, `security/` — derived
-  and probed profiles, including the measured absences (no idempotency contract,
-  no pagination, no rate-limit signalling, no status page, no changelog, no
-  security.txt, no SDKs).
+## Where to find this API
 
-**ACORD posture: no ACORD reference found.** Searching tal.com.au,
-adviser.tal.com.au and backd.com.au for ACORD, AL3, ACORD XML and NGDS returned
-zero occurrences — consistent with the market, since ACORD AL3 / IVANS agency
-download is a US property-and-casualty artifact while Australian life insurance
-moves adviser data through commercial planning and quoting software under
-bilateral arrangements. TAL names no such integration publicly either.
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
 
-Of the four insurance verbs, **none of quote, bind, issue or FNOL is exposed
-programmatically**. Quoting and application live inside the gated Adviser
-Centre; claims are lodged through web forms at
-`www.tal.com.au/claims/make-a-claim`.
-
-## Why this record matters
-
-Australia has the legal machinery for open insurance and no live obligation.
-APRA supervises prudentially, and the Consumer Data Right that already opened
-banking and energy was designated to extend to general insurance and then
-deferred and de-prioritised — so the CDR seam that made Australian banking
-legible stops before insurance. TAL sits squarely in that gap: a dominant
-carrier with no regulatory forcing function to publish anything and no
-commercial reason to self-serve when its distribution runs through advisers,
-super funds and named partners. Its most API-shaped asset is not even its own —
-*backd by TAL* is built on Cover Genius, the Sydney embedded-insurance company
-that does publish a real API, and that consumer brand currently serves a
-"Coming Soon" placeholder at [backd.com.au](https://backd.com.au/).
-
-Recording that shape accurately is the point — and the second pass sharpened it.
-The absence is not of APIs; TAL has an identity tenant, a GraphQL underwriting
-engine and a bearer-protected B2B estate. The absence is of *documentation,
-registration and self-service*. A carrier can run a full API programme and still
-be invisible to everyone it did not sign a contract with.
-
-## Links
-
-- [TAL](https://www.tal.com.au/)
-- [About TAL](https://www.tal.com.au/about-us)
-- [TAL Adviser Centre (login-gated)](https://adviser.tal.com.au/)
-- [TAL Group HQ (login-gated superannuation partner portal)](https://www.grouphq.tal.com.au/)
-- [Adviser Partners](https://www.tal.com.au/adviser-partners)
-- [Superannuation Partners](https://www.tal.com.au/superannuation-partners)
-- [Contact / Support](https://www.tal.com.au/contact-us)
-- [Insurance FAQs](https://www.tal.com.au/tools-and-faqs/insurance-faqs)
-- [Media Centre](https://www.tal.com.au/about-us/media-centre)
-- [Slice of Life Blog](https://www.tal.com.au/slice-of-life-blog)
+- [Website](https://www.tal.com.au/)
+- [Support](https://www.tal.com.au/contact-us)
+- [Blog](https://www.tal.com.au/slice-of-life-blog)
 - [Security](https://www.tal.com.au/security)
-- [Privacy Policy](https://www.tal.com.au/privacy-policy)
+- [Privacy policy](https://www.tal.com.au/privacy-policy)
 
-## Review
+## API Evangelist rating
 
-See [review.yml](review.yml) for the full probe log, HTTP statuses, ACORD
-posture and auth-model findings.
+**Kin Score 19.6** — emerging · rubric 0.24.0 · scored 2026-10-17
+
+| Facet | Score |
+|---|---|
+| Discoverability | 79.5 |
+| Contract quality | 0.0 |
+| Contract governance | 4.5 |
+| Operational transparency | 10.5 |
+| Developer ergonomics | 19.0 |
+| Access clarity | 17.1 |
+
+**Agent readiness 15.8** — agent-aware
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | — |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | served (partial credit) |
+| Idempotency | — |
+| Error Semantics | derived (partial credit) |
+| OpenAPI Examples | — |
+| Rate Limit Signal | — |
+| Event Surface Described | — |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | yes |
+| Agentic Commerce | — |
+
+**Regulatory alignment 33.3** — Insurance
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/tal-australia/](https://apis.io/providers/tal-australia/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for TAL: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/tal-australia/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
